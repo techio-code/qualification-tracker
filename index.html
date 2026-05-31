@@ -17,67 +17,70 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ===== CSS Variables (DESIGN.md Mode B The Row + 建設業オレンジ) ===== */
+    /* ===== CSS Variables — PRO UPGRADE 2026-05-31 ===== */
+    /* Mode B The Row + 建設業アクセント + Awwwards品質バー準拠 */
     :root {
       --paper:   #F5F4F0;
-      --ink:     #1C1C1C;
-      --stone:   #6B6B66;
-      --tan:     #C8B89E;
       --white:   #ffffff;
+      --ink-1:   #0A0A0A;
+      --ink-2:   #1C1C1C;
+      --ink-3:   #4A4A45;
+      --ink-4:   #7A7A75;
+      --ink-5:   #E0DDD8;
 
-      /* 建設業アクセントカラー (DESIGN.md 建設・現場系) */
-      --orange:  #FBA32A;
-      --orange-light: rgba(251, 163, 42, 0.12);
-      --orange-mid:   rgba(251, 163, 42, 0.25);
+      /* 建設業アクセント — 10%以下ルール厳守 */
+      --orange:       #FBA32A;
+      --orange-dim:   rgba(251, 163, 42, 0.08);
+      --orange-mid:   rgba(251, 163, 42, 0.20);
 
-      /* ステータス色 */
-      --status-ok:      #00D4AA;
-      --status-ok-bg:   rgba(0, 212, 170, 0.10);
-      --status-warn30:  #FBA32A;
-      --status-warn30-bg: rgba(251, 163, 42, 0.12);
-      --status-warn14:  #FF8C00;
-      --status-warn14-bg: rgba(255, 140, 0, 0.15);
-      --status-expired: #FF5252;
-      --status-expired-bg: rgba(255, 82, 82, 0.12);
+      /* ステータス */
+      --ok:      #00A882;
+      --ok-bg:   rgba(0, 168, 130, 0.08);
+      --w30:     #D08000;
+      --w30-bg:  rgba(208, 128, 0, 0.08);
+      --w14:     #C05800;
+      --w14-bg:  rgba(192, 88, 0, 0.10);
+      --exp:     #C0001A;
+      --exp-bg:  rgba(192, 0, 26, 0.08);
 
-      /* Spacing (8px grid) */
-      --sp-xs:  4px;
-      --sp-sm:  8px;
-      --sp-md:  16px;
-      --sp-lg:  24px;
-      --sp-xl:  32px;
-      --sp-2xl: 48px;
+      /* Spacing */
+      --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px;
+      --sp-lg: 24px; --sp-xl: 40px; --sp-2xl: 64px; --sp-3xl: 96px;
 
       --font-sans: 'Noto Sans JP', sans-serif;
-      --radius-sm: 8px;
-      --radius-md: 12px;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 4px;   /* 全要素統一 — 建設実務=真剣さ */
     }
 
-    /* ===== Reset ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 16px; scroll-behavior: smooth; }
     body {
       font-family: var(--font-sans);
       background: var(--paper);
-      color: var(--ink);
-      line-height: 1.8;
+      color: var(--ink-2);
+      line-height: 1.75;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* ===== Header ===== */
+    /* ===== HEADER — 洗練版 ===== */
     .header {
-      background: var(--white);
-      border-bottom: 2px solid var(--orange);
-      padding: var(--sp-md) var(--sp-lg);
+      background: var(--ink-1);
+      border-bottom: none;
+      padding: 0 48px;
+      height: 56px;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
     }
     .header-inner {
       max-width: 1100px;
       margin: 0 auto;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -86,50 +89,85 @@
     .header-title {
       display: flex;
       align-items: center;
-      gap: var(--sp-sm);
+      gap: 14px;
     }
-    .header-icon {
-      width: 36px;
-      height: 36px;
+    /* アクセントライン（ヘッダー左） */
+    .header-accent-bar {
+      width: 3px;
+      height: 22px;
       background: var(--orange);
-      border-radius: var(--sp-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
       flex-shrink: 0;
     }
-    .header h1 {
-      font-size: 18px;
+    .header-text h1 {
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--ink);
+      letter-spacing: 0.06em;
+      color: #fff;
+      line-height: 1.2;
     }
     .header-sub {
-      font-size: 12px;
-      color: var(--stone);
-      letter-spacing: 0.03em;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-top: 2px;
     }
     .header-actions {
       display: flex;
-      gap: var(--sp-sm);
+      gap: 6px;
       flex-shrink: 0;
     }
 
-    /* ===== Main Layout ===== */
+    /* ===== STATS BAR — ビジュアルアンカー（Stripe風） ===== */
+    .stats-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--ink-5);
+      display: flex;
+    }
+    .stats-item {
+      flex: 1;
+      padding: 20px 32px;
+      border-right: 1px solid var(--ink-5);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .stats-item:last-child { border-right: none; }
+    .stats-num {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--ink-1);
+      line-height: 1;
+    }
+    .stats-num.num-orange { color: var(--orange); }
+    .stats-num.num-warn   { color: var(--w14); }
+    .stats-num.num-exp    { color: var(--exp); }
+    .stats-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink-4);
+    }
+
+    /* ===== MAIN LAYOUT ===== */
     .main {
       max-width: 1100px;
       margin: 0 auto;
-      padding: var(--sp-xl) var(--sp-lg);
+      padding: var(--sp-xl) 48px var(--sp-2xl);
     }
 
-    /* ===== Alert Banner ===== */
+    /* ===== ALERT BANNER ===== */
     .alert-banner {
       background: var(--white);
-      border-radius: var(--radius-md);
-      padding: var(--sp-lg);
+      border: 1px solid var(--ink-5);
+      border-left: 3px solid var(--exp);
+      border-radius: var(--radius);
+      padding: var(--sp-lg) var(--sp-xl);
       margin-bottom: var(--sp-xl);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
       display: none;
     }
     .alert-banner.has-alerts { display: block; }
@@ -140,30 +178,33 @@
       margin-bottom: var(--sp-md);
     }
     .alert-count-badge {
-      background: var(--status-expired);
+      background: var(--exp);
       color: white;
-      font-size: 13px;
-      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
       padding: 2px 10px;
       border-radius: 100px;
+      letter-spacing: 0.06em;
     }
     .alert-banner-title {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
-      color: var(--ink);
+      letter-spacing: 0.04em;
+      color: var(--ink-2);
     }
     .alert-list {
       display: flex;
       flex-direction: column;
-      gap: var(--sp-sm);
+      gap: 4px;
     }
     .alert-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: var(--sp-sm) var(--sp-md);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
+      padding: 8px var(--sp-md);
+      border-radius: var(--radius);
+      font-size: 13px;
       gap: var(--sp-md);
       flex-wrap: wrap;
     }
@@ -172,87 +213,110 @@
       align-items: center;
       gap: var(--sp-sm);
     }
-    .alert-item.expired   { background: var(--status-expired-bg);  border-left: 3px solid var(--status-expired); }
-    .alert-item.warn14    { background: var(--status-warn14-bg);    border-left: 3px solid var(--status-warn14); }
-    .alert-item.warn30    { background: var(--status-warn30-bg);    border-left: 3px solid var(--status-warn30); }
+    .alert-item.expired { background: var(--exp-bg); border-left: 2px solid var(--exp); }
+    .alert-item.warn14  { background: var(--w14-bg); border-left: 2px solid var(--w14); }
+    .alert-item.warn30  { background: var(--w30-bg); border-left: 2px solid var(--w30); }
     .alert-dot {
-      width: 8px; height: 8px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .alert-item.expired .alert-dot  { background: var(--status-expired); }
-    .alert-item.warn14  .alert-dot  { background: var(--status-warn14); }
-    .alert-item.warn30  .alert-dot  { background: var(--status-warn30); }
+    .alert-item.expired .alert-dot { background: var(--exp); }
+    .alert-item.warn14  .alert-dot { background: var(--w14); }
+    .alert-item.warn30  .alert-dot { background: var(--w30); }
     .alert-days {
-      font-size: 12px;
-      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
       padding: 2px 8px;
       border-radius: 100px;
       white-space: nowrap;
+      letter-spacing: 0.04em;
     }
-    .alert-item.expired .alert-days  { background: var(--status-expired); color: white; }
-    .alert-item.warn14  .alert-days  { background: var(--status-warn14);  color: white; }
-    .alert-item.warn30  .alert-days  { background: var(--status-warn30);  color: white; }
+    .alert-item.expired .alert-days { background: var(--exp); color: white; }
+    .alert-item.warn14  .alert-days { background: var(--w14); color: white; }
+    .alert-item.warn30  .alert-days { background: var(--w30); color: white; }
 
-    /* ===== Cards Grid ===== */
+    /* ===== SECTION HEADING ===== */
     .section-header {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
       margin-bottom: var(--sp-md);
       gap: var(--sp-md);
       flex-wrap: wrap;
+      padding-bottom: var(--sp-md);
+      border-bottom: 1px solid var(--ink-5);
+    }
+    .section-heading-group {}
+    .section-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink-4);
+      margin-bottom: 6px;
     }
     .section-title {
-      font-size: 18px;
+      font-size: 22px;
       font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--ink);
+      letter-spacing: -0.01em;
+      color: var(--ink-1);
+      line-height: 1.2;
     }
     .record-count {
-      font-size: 13px;
-      color: var(--stone);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--ink-4);
+      padding-bottom: 4px;
     }
 
-    /* フィルタ・検索行 */
+    /* ===== TOOLBAR ===== */
     .toolbar {
       display: flex;
-      gap: var(--sp-sm);
+      gap: 6px;
       margin-bottom: var(--sp-lg);
       flex-wrap: wrap;
     }
     .search-input {
       height: 40px;
       padding: 0 var(--sp-md);
-      border-radius: var(--radius-sm);
-      border: 1.5px solid #D0D0D0;
+      border-radius: var(--radius);
+      border: 1px solid var(--ink-5);
       font-size: 14px;
       font-family: var(--font-sans);
       background: var(--white);
       outline: none;
       transition: border-color 0.2s;
-      min-width: 180px;
+      min-width: 200px;
       flex: 1;
+      color: var(--ink-2);
     }
-    .search-input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(251,163,42,0.15); }
+    .search-input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px var(--orange-dim);
+    }
+    .search-input::placeholder { color: var(--ink-5); }
     .filter-select {
       height: 40px;
       padding: 0 var(--sp-md);
-      border-radius: var(--radius-sm);
-      border: 1.5px solid #D0D0D0;
-      font-size: 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--ink-5);
+      font-size: 13px;
       font-family: var(--font-sans);
       background: var(--white);
       cursor: pointer;
       outline: none;
+      color: var(--ink-2);
     }
     .filter-select:focus { border-color: var(--orange); }
 
-    /* テーブル */
+    /* ===== TABLE — プロ品質 ===== */
     .table-wrap {
       background: var(--white);
-      border-radius: var(--radius-md);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      border: 1px solid var(--ink-5);
+      border-radius: var(--radius);
       overflow: hidden;
       overflow-x: auto;
     }
@@ -262,86 +326,108 @@
       font-size: 14px;
     }
     thead {
-      background: var(--ink);
-      color: white;
+      background: var(--paper);
+      border-bottom: 1px solid var(--ink-5);
     }
     thead th {
-      padding: var(--sp-sm) var(--sp-md);
+      padding: 12px var(--sp-md);
       text-align: left;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      font-size: 13px;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--ink-4);
       white-space: nowrap;
     }
     tbody tr {
-      border-bottom: 1px solid rgba(0,0,0,0.06);
-      transition: background 0.15s;
+      border-bottom: 1px solid var(--ink-5);
+      transition: background 0.12s;
     }
     tbody tr:last-child { border-bottom: none; }
-    tbody tr:hover { background: rgba(251,163,42,0.04); }
+    tbody tr:hover { background: var(--orange-dim); }
     td {
-      padding: var(--sp-sm) var(--sp-md);
+      padding: 12px var(--sp-md);
       vertical-align: middle;
     }
-    .td-name   { font-weight: 600; }
-    .td-date   { color: var(--stone); font-size: 13px; white-space: nowrap; }
+    .td-name { font-weight: 600; letter-spacing: 0.02em; }
+    .td-date {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-4);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
     .td-actions { white-space: nowrap; }
 
-    /* ステータスバッジ */
+    /* ===== STATUS BADGE ===== */
     .badge {
       display: inline-flex;
       align-items: center;
-      height: 24px;
-      padding: 0 var(--sp-sm);
+      height: 22px;
+      padding: 0 8px;
       border-radius: 100px;
-      font-size: 12px;
-      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
       white-space: nowrap;
     }
-    .badge-ok      { background: var(--status-ok-bg);      color: #007A61; }
-    .badge-warn30  { background: var(--status-warn30-bg);  color: #B07000; }
-    .badge-warn14  { background: var(--status-warn14-bg);  color: #A04800; }
-    .badge-expired { background: var(--status-expired-bg); color: #B00020; }
+    .badge-ok      { background: var(--ok-bg);  color: var(--ok); }
+    .badge-warn30  { background: var(--w30-bg); color: var(--w30); }
+    .badge-warn14  { background: var(--w14-bg); color: var(--w14); }
+    .badge-expired { background: var(--exp-bg); color: var(--exp); }
 
-    /* 空状態 */
+    /* ===== EMPTY STATE ===== */
     .empty-state {
       text-align: center;
-      padding: var(--sp-2xl) var(--sp-lg);
-      color: var(--stone);
+      padding: 64px var(--sp-lg);
+      color: var(--ink-4);
     }
-    .empty-state-icon { font-size: 48px; margin-bottom: var(--sp-md); }
-    .empty-state p { font-size: 15px; }
+    .empty-state-icon { font-size: 40px; margin-bottom: var(--sp-md); opacity: 0.5; }
+    .empty-state p {
+      font-size: 14px;
+      line-height: 1.8;
+      max-width: 360px;
+      margin: 0 auto;
+    }
 
-    /* ===== Buttons ===== */
+    /* ===== BUTTONS ===== */
     .btn {
       height: 40px;
       min-width: 44px;
       padding: 0 var(--sp-lg);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
-      font-weight: 600;
+      border-radius: var(--radius);
+      font-size: 12px;
+      font-weight: 700;
       font-family: var(--font-sans);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       cursor: pointer;
       border: none;
-      transition: all 0.2s ease;
+      transition: all 0.15s;
       display: inline-flex;
       align-items: center;
       gap: var(--sp-xs);
       white-space: nowrap;
     }
-    .btn-primary   { background: var(--orange); color: white; }
-    .btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--tan); }
-    .btn-danger    { background: transparent; color: var(--status-expired); border: 1.5px solid var(--status-expired); }
-    .btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
-    .btn:disabled  { opacity: 0.4; cursor: not-allowed; }
-    .btn-sm { height: 32px; padding: 0 var(--sp-md); font-size: 13px; }
+    .btn-primary   { background: var(--orange); color: var(--ink-1); }
+    .btn-secondary { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); }
+    .btn-danger    { background: transparent; color: var(--exp); border: 1px solid var(--exp); }
+    /* メインエリア内のsecondaryは黒背景でなく白 */
+    .main .btn-secondary {
+      color: var(--ink-3);
+      border: 1px solid var(--ink-5);
+    }
+    .btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
+    .btn:disabled  { opacity: 0.35; cursor: not-allowed; }
+    .btn-sm { height: 30px; padding: 0 12px; font-size: 11px; letter-spacing: 0.06em; }
 
-    /* ===== Modal ===== */
+    /* ===== MODAL ===== */
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.45);
+      background: rgba(0,0,0,0.50);
       z-index: 200;
       display: none;
       align-items: center;
@@ -351,7 +437,8 @@
     .modal-overlay.open { display: flex; }
     .modal {
       background: var(--white);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius);
+      border: 1px solid var(--ink-5);
       padding: var(--sp-xl);
       width: 100%;
       max-width: 520px;
@@ -361,49 +448,63 @@
     .modal-title {
       font-size: 18px;
       font-weight: 700;
+      letter-spacing: -0.01em;
       margin-bottom: var(--sp-lg);
-      letter-spacing: 0.05em;
+      padding-bottom: var(--sp-md);
+      border-bottom: 1px solid var(--ink-5);
+      color: var(--ink-1);
     }
     .form-group { margin-bottom: var(--sp-md); }
     .form-label {
       display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--stone);
-      margin-bottom: var(--sp-xs);
-      letter-spacing: 0.03em;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-4);
+      margin-bottom: 6px;
     }
-    .form-label span { color: var(--status-expired); }
+    .form-label span { color: var(--exp); }
     .form-input, .form-select {
       width: 100%;
       height: 44px;
       padding: 0 var(--sp-md);
-      border-radius: var(--radius-sm);
-      border: 1.5px solid #D0D0D0;
+      border-radius: var(--radius);
+      border: 1px solid var(--ink-5);
       font-size: 15px;
       font-family: var(--font-sans);
       background: var(--white);
+      color: var(--ink-2);
       outline: none;
       transition: border-color 0.2s;
     }
     .form-input:focus, .form-select:focus {
       border-color: var(--orange);
-      box-shadow: 0 0 0 3px rgba(251,163,42,0.15);
+      box-shadow: 0 0 0 3px var(--orange-dim);
     }
-    .form-input::placeholder { color: var(--tan); }
+    .form-input::placeholder { color: var(--ink-5); }
     .form-input[list] { cursor: text; }
     .modal-actions {
       display: flex;
-      gap: var(--sp-sm);
+      gap: 6px;
       justify-content: flex-end;
       margin-top: var(--sp-xl);
+      padding-top: var(--sp-md);
+      border-top: 1px solid var(--ink-5);
       flex-wrap: wrap;
     }
+    /* モーダル内ボタン */
+    .modal .btn-secondary {
+      color: var(--ink-3);
+      border: 1px solid var(--ink-5);
+    }
+    .modal .btn-primary { background: var(--orange); color: var(--ink-1); }
 
-    /* CSV import modal */
+    /* ===== CSV MODAL ===== */
     .csv-drop-zone {
-      border: 2px dashed var(--tan);
-      border-radius: var(--radius-sm);
+      border: 1px dashed var(--ink-5);
+      border-radius: var(--radius);
       padding: var(--sp-xl);
       text-align: center;
       cursor: pointer;
@@ -412,88 +513,112 @@
       margin-bottom: var(--sp-md);
     }
     .csv-drop-zone:hover,
-    .csv-drop-zone.dragover { border-color: var(--orange); background: var(--orange-light); }
-    .csv-drop-zone-icon { font-size: 32px; margin-bottom: var(--sp-sm); }
-    .csv-drop-zone p { font-size: 14px; color: var(--stone); }
+    .csv-drop-zone.dragover { border-color: var(--orange); background: var(--orange-dim); }
+    .csv-drop-zone-icon { font-size: 28px; margin-bottom: var(--sp-sm); opacity: 0.6; }
+    .csv-drop-zone p { font-size: 13px; color: var(--ink-4); line-height: 1.7; }
     .csv-format-note {
       background: var(--paper);
-      border-radius: var(--radius-sm);
+      border-radius: var(--radius);
       padding: var(--sp-md);
-      font-size: 13px;
-      color: var(--stone);
-      line-height: 1.7;
+      font-size: 12px;
+      color: var(--ink-4);
+      line-height: 1.8;
     }
     .csv-format-note code {
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(0,0,0,0.06);
+      font-family: var(--font-mono);
+      background: rgba(0,0,0,0.05);
       padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
+      border-radius: 3px;
+      font-size: 11px;
     }
     .csv-preview {
       margin-top: var(--sp-md);
-      font-size: 13px;
-      color: var(--stone);
-      padding: var(--sp-sm) var(--sp-md);
-      background: var(--status-ok-bg);
-      border-radius: var(--radius-sm);
-      border-left: 3px solid var(--status-ok);
+      font-size: 12px;
+      color: var(--ink-3);
+      padding: 8px var(--sp-md);
+      background: var(--ok-bg);
+      border-radius: var(--radius);
+      border-left: 2px solid var(--ok);
     }
     .csv-error {
       margin-top: var(--sp-sm);
-      font-size: 13px;
-      color: var(--status-expired);
-      padding: var(--sp-sm) var(--sp-md);
-      background: var(--status-expired-bg);
-      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--exp);
+      padding: 8px var(--sp-md);
+      background: var(--exp-bg);
+      border-radius: var(--radius);
     }
 
-    /* Toast */
+    /* ===== TOAST ===== */
     .toast-container {
       position: fixed;
       bottom: var(--sp-xl);
-      right: var(--sp-lg);
+      right: 32px;
       z-index: 999;
       display: flex;
       flex-direction: column;
       gap: var(--sp-sm);
     }
     .toast {
-      background: var(--ink);
+      background: var(--ink-1);
       color: white;
-      padding: var(--sp-sm) var(--sp-lg);
-      border-radius: var(--radius-sm);
-      font-size: 14px;
+      padding: 10px var(--sp-lg);
+      border-radius: var(--radius);
+      font-size: 13px;
       font-weight: 600;
+      letter-spacing: 0.02em;
       opacity: 0;
       transform: translateY(8px);
       transition: all 0.25s ease;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
       pointer-events: none;
+      min-width: 220px;
     }
     .toast.show { opacity: 1; transform: translateY(0); }
-    .toast.success { border-left: 4px solid var(--status-ok); }
-    .toast.error   { border-left: 4px solid var(--status-expired); }
+    .toast.success { border-left: 3px solid var(--ok); }
+    .toast.error   { border-left: 3px solid var(--exp); }
 
-    /* ===== Footer ===== */
+    /* ===== FOOTER ===== */
     .footer {
-      text-align: center;
-      padding: var(--sp-xl) var(--sp-lg);
-      color: var(--stone);
-      font-size: 13px;
-      border-top: 1px solid rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 48px;
+      color: var(--ink-4);
+      font-size: 12px;
+      border-top: 1px solid var(--ink-5);
       margin-top: var(--sp-2xl);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-brand {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .footer-note {
+      font-size: 11px;
+      color: var(--ink-4);
     }
     .footer a { color: var(--orange); text-decoration: none; }
 
-    /* ===== Mobile ===== */
+    /* ===== MOBILE ===== */
+    @media (max-width: 768px) {
+      .header { padding: 0 20px; }
+      .main { padding: var(--sp-md) 20px var(--sp-xl); }
+      .stats-bar { overflow-x: auto; }
+      .stats-item { padding: 16px 20px; min-width: 120px; }
+      .stats-num { font-size: 22px; }
+      .footer { padding: 20px; flex-direction: column; align-items: flex-start; }
+    }
     @media (max-width: 640px) {
-      .header h1 { font-size: 15px; }
+      .header-text h1 { font-size: 13px; }
       .header-sub { display: none; }
-      .header-actions .btn { padding: 0 var(--sp-sm); font-size: 12px; }
-      .main { padding: var(--sp-md); }
+      .header-actions .btn { padding: 0 var(--sp-sm); font-size: 11px; }
       thead th:nth-child(4),
-      tbody td:nth-child(4) { display: none; } /* 取得日を非表示 */
+      tbody td:nth-child(4) { display: none; }
       .modal { padding: var(--sp-lg); }
       .modal-actions { justify-content: stretch; }
       .modal-actions .btn { flex: 1; justify-content: center; }
@@ -508,10 +633,10 @@
 <header class="header">
   <div class="header-inner">
     <div class="header-title">
-      <div class="header-icon">&#128736;</div>
-      <div>
+      <div class="header-accent-bar"></div>
+      <div class="header-text">
         <h1>資格有効期限管理</h1>
-        <div class="header-sub">建設業 / 安全教育 / 施工管理 — データは端末に保存されます</div>
+        <div class="header-sub">Qualification Tracker — 建設業 / 安全教育 / 施工管理</div>
       </div>
     </div>
     <div class="header-actions">
@@ -521,6 +646,26 @@
     </div>
   </div>
 </header>
+
+<!-- Stats Bar — ビジュアルアンカー -->
+<div class="stats-bar" id="statsBar">
+  <div class="stats-item">
+    <span class="stats-num" id="statTotal">—</span>
+    <span class="stats-label">Total Records</span>
+  </div>
+  <div class="stats-item">
+    <span class="stats-num num-orange" id="statWarn30">—</span>
+    <span class="stats-label">30日以内</span>
+  </div>
+  <div class="stats-item">
+    <span class="stats-num num-warn" id="statWarn14">—</span>
+    <span class="stats-label">14日以内</span>
+  </div>
+  <div class="stats-item">
+    <span class="stats-num num-exp" id="statExpired">—</span>
+    <span class="stats-label">失効</span>
+  </div>
+</div>
 
 <!-- Main -->
 <main class="main">
@@ -536,7 +681,8 @@
 
   <!-- Table Section -->
   <div class="section-header">
-    <div>
+    <div class="section-heading-group">
+      <div class="section-eyebrow">Qualification Registry</div>
       <div class="section-title">資格一覧</div>
     </div>
     <div class="record-count" id="recordCount"></div>
@@ -576,8 +722,8 @@
 
 <!-- Footer -->
 <footer class="footer">
-  <p>資格有効期限管理 &mdash; データはブラウザのローカルストレージに保存されます。外部送信なし。<br>
-  Powered by <a href="https://techio-code.github.io" target="_blank" rel="noopener">techio-code</a></p>
+  <span class="footer-brand">Qualification Tracker</span>
+  <span class="footer-note">データはブラウザのローカルストレージに保存。外部送信なし。&nbsp;·&nbsp; <a href="https://techio-code.github.io" target="_blank" rel="noopener">techio-code</a></span>
 </footer>
 
 <!-- Toast Container -->
@@ -872,7 +1018,19 @@ function renderTable() {
   }).join('');
 }
 
+function renderStats() {
+  const total   = records.length;
+  const expired = records.filter(r => getStatus(r.expiry).code === 'expired').length;
+  const warn14  = records.filter(r => getStatus(r.expiry).code === 'warn14').length;
+  const warn30  = records.filter(r => getStatus(r.expiry).code === 'warn30').length;
+  document.getElementById('statTotal').textContent   = total   || '0';
+  document.getElementById('statExpired').textContent = expired || '0';
+  document.getElementById('statWarn14').textContent  = warn14  || '0';
+  document.getElementById('statWarn30').textContent  = warn30  || '0';
+}
+
 function renderAll() {
+  renderStats();
   renderAlerts();
   renderTable();
 }
