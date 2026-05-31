@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>資格有効期限管理 | 建設業向け</title>
+  <meta name="description" content="建設会社の資格有効期限・安全教育履歴をシンプルに一括管理。CSVインポート対応・失効30日前から自動アラート。無料・インストール不要。">
+  <!-- OGP -->
+  <meta property="og:title" content="資格有効期限管理 | 建設業向け">
+  <meta property="og:description" content="建設会社の資格有効期限をシンプルに一括管理。失効30日前から自動アラート。無料・インストール不要。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://techio-code.github.io/qualification-tracker/ogp.png">
+  <meta property="og:url" content="https://techio-code.github.io/qualification-tracker/">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== CSS Variables (DESIGN.md Mode B The Row + 建設業オレンジ) ===== */
+    :root {
+      --paper:   #F5F4F0;
+      --ink:     #1C1C1C;
+      --stone:   #6B6B66;
+      --tan:     #C8B89E;
+      --white:   #ffffff;
+
+      /* 建設業アクセントカラー (DESIGN.md 建設・現場系) */
+      --orange:  #FBA32A;
+      --orange-light: rgba(251, 163, 42, 0.12);
+      --orange-mid:   rgba(251, 163, 42, 0.25);
+
+      /* ステータス色 */
+      --status-ok:      #00D4AA;
+      --status-ok-bg:   rgba(0, 212, 170, 0.10);
+      --status-warn30:  #FBA32A;
+      --status-warn30-bg: rgba(251, 163, 42, 0.12);
+      --status-warn14:  #FF8C00;
+      --status-warn14-bg: rgba(255, 140, 0, 0.15);
+      --status-expired: #FF5252;
+      --status-expired-bg: rgba(255, 82, 82, 0.12);
+
+      /* Spacing (8px grid) */
+      --sp-xs:  4px;
+      --sp-sm:  8px;
+      --sp-md:  16px;
+      --sp-lg:  24px;
+      --sp-xl:  32px;
+      --sp-2xl: 48px;
+
+      --font-sans: 'Noto Sans JP', sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+    }
+
+    /* ===== Reset ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.8;
+      min-height: 100vh;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      background: var(--white);
+      border-bottom: 2px solid var(--orange);
+      padding: var(--sp-md) var(--sp-lg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--sp-md);
+    }
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .header-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--orange);
+      border-radius: var(--sp-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+    }
+    .header-sub {
+      font-size: 12px;
+      color: var(--stone);
+      letter-spacing: 0.03em;
+    }
+    .header-actions {
+      display: flex;
+      gap: var(--sp-sm);
+      flex-shrink: 0;
+    }
+
+    /* ===== Main Layout ===== */
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: var(--sp-xl) var(--sp-lg);
+    }
+
+    /* ===== Alert Banner ===== */
+    .alert-banner {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--sp-lg);
+      margin-bottom: var(--sp-xl);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .alert-banner.has-alerts { display: block; }
+    .alert-banner-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-md);
+    }
+    .alert-count-badge {
+      background: var(--status-expired);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 100px;
+    }
+    .alert-banner-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+    }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-sm) var(--sp-md);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+    }
+    .alert-item-left {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+    }
+    .alert-item.expired   { background: var(--status-expired-bg);  border-left: 3px solid var(--status-expired); }
+    .alert-item.warn14    { background: var(--status-warn14-bg);    border-left: 3px solid var(--status-warn14); }
+    .alert-item.warn30    { background: var(--status-warn30-bg);    border-left: 3px solid var(--status-warn30); }
+    .alert-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .alert-item.expired .alert-dot  { background: var(--status-expired); }
+    .alert-item.warn14  .alert-dot  { background: var(--status-warn14); }
+    .alert-item.warn30  .alert-dot  { background: var(--status-warn30); }
+    .alert-days {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .alert-item.expired .alert-days  { background: var(--status-expired); color: white; }
+    .alert-item.warn14  .alert-days  { background: var(--status-warn14);  color: white; }
+    .alert-item.warn30  .alert-days  { background: var(--status-warn30);  color: white; }
+
+    /* ===== Cards Grid ===== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-md);
+      gap: var(--sp-md);
+      flex-wrap: wrap;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+    }
+    .record-count {
+      font-size: 13px;
+      color: var(--stone);
+    }
+
+    /* フィルタ・検索行 */
+    .toolbar {
+      display: flex;
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-lg);
+      flex-wrap: wrap;
+    }
+    .search-input {
+      height: 40px;
+      padding: 0 var(--sp-md);
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #D0D0D0;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 180px;
+      flex: 1;
+    }
+    .search-input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(251,163,42,0.15); }
+    .filter-select {
+      height: 40px;
+      padding: 0 var(--sp-md);
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #D0D0D0;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      background: var(--white);
+      cursor: pointer;
+      outline: none;
+    }
+    .filter-select:focus { border-color: var(--orange); }
+
+    /* テーブル */
+    .table-wrap {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      overflow: hidden;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead {
+      background: var(--ink);
+      color: white;
+    }
+    thead th {
+      padding: var(--sp-sm) var(--sp-md);
+      text-align: left;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(251,163,42,0.04); }
+    td {
+      padding: var(--sp-sm) var(--sp-md);
+      vertical-align: middle;
+    }
+    .td-name   { font-weight: 600; }
+    .td-date   { color: var(--stone); font-size: 13px; white-space: nowrap; }
+    .td-actions { white-space: nowrap; }
+
+    /* ステータスバッジ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 var(--sp-sm);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .badge-ok      { background: var(--status-ok-bg);      color: #007A61; }
+    .badge-warn30  { background: var(--status-warn30-bg);  color: #B07000; }
+    .badge-warn14  { background: var(--status-warn14-bg);  color: #A04800; }
+    .badge-expired { background: var(--status-expired-bg); color: #B00020; }
+
+    /* 空状態 */
+    .empty-state {
+      text-align: center;
+      padding: var(--sp-2xl) var(--sp-lg);
+      color: var(--stone);
+    }
+    .empty-state-icon { font-size: 48px; margin-bottom: var(--sp-md); }
+    .empty-state p { font-size: 15px; }
+
+    /* ===== Buttons ===== */
+    .btn {
+      height: 40px;
+      min-width: 44px;
+      padding: 0 var(--sp-lg);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      white-space: nowrap;
+    }
+    .btn-primary   { background: var(--orange); color: white; }
+    .btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid var(--tan); }
+    .btn-danger    { background: transparent; color: var(--status-expired); border: 1.5px solid var(--status-expired); }
+    .btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn:disabled  { opacity: 0.4; cursor: not-allowed; }
+    .btn-sm { height: 32px; padding: 0 var(--sp-md); font-size: 13px; }
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-md);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white);
+      border-radius: var(--radius-md);
+      padding: var(--sp-xl);
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: var(--sp-lg);
+      letter-spacing: 0.05em;
+    }
+    .form-group { margin-bottom: var(--sp-md); }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--stone);
+      margin-bottom: var(--sp-xs);
+      letter-spacing: 0.03em;
+    }
+    .form-label span { color: var(--status-expired); }
+    .form-input, .form-select {
+      width: 100%;
+      height: 44px;
+      padding: 0 var(--sp-md);
+      border-radius: var(--radius-sm);
+      border: 1.5px solid #D0D0D0;
+      font-size: 15px;
+      font-family: var(--font-sans);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(251,163,42,0.15);
+    }
+    .form-input::placeholder { color: var(--tan); }
+    .form-input[list] { cursor: text; }
+    .modal-actions {
+      display: flex;
+      gap: var(--sp-sm);
+      justify-content: flex-end;
+      margin-top: var(--sp-xl);
+      flex-wrap: wrap;
+    }
+
+    /* CSV import modal */
+    .csv-drop-zone {
+      border: 2px dashed var(--tan);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-xl);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--paper);
+      margin-bottom: var(--sp-md);
+    }
+    .csv-drop-zone:hover,
+    .csv-drop-zone.dragover { border-color: var(--orange); background: var(--orange-light); }
+    .csv-drop-zone-icon { font-size: 32px; margin-bottom: var(--sp-sm); }
+    .csv-drop-zone p { font-size: 14px; color: var(--stone); }
+    .csv-format-note {
+      background: var(--paper);
+      border-radius: var(--radius-sm);
+      padding: var(--sp-md);
+      font-size: 13px;
+      color: var(--stone);
+      line-height: 1.7;
+    }
+    .csv-format-note code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0,0,0,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .csv-preview {
+      margin-top: var(--sp-md);
+      font-size: 13px;
+      color: var(--stone);
+      padding: var(--sp-sm) var(--sp-md);
+      background: var(--status-ok-bg);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--status-ok);
+    }
+    .csv-error {
+      margin-top: var(--sp-sm);
+      font-size: 13px;
+      color: var(--status-expired);
+      padding: var(--sp-sm) var(--sp-md);
+      background: var(--status-expired-bg);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: var(--sp-xl);
+      right: var(--sp-lg);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+    }
+    .toast {
+      background: var(--ink);
+      color: white;
+      padding: var(--sp-sm) var(--sp-lg);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-left: 4px solid var(--status-ok); }
+    .toast.error   { border-left: 4px solid var(--status-expired); }
+
+    /* ===== Footer ===== */
+    .footer {
+      text-align: center;
+      padding: var(--sp-xl) var(--sp-lg);
+      color: var(--stone);
+      font-size: 13px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      margin-top: var(--sp-2xl);
+    }
+    .footer a { color: var(--orange); text-decoration: none; }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 640px) {
+      .header h1 { font-size: 15px; }
+      .header-sub { display: none; }
+      .header-actions .btn { padding: 0 var(--sp-sm); font-size: 12px; }
+      .main { padding: var(--sp-md); }
+      thead th:nth-child(4),
+      tbody td:nth-child(4) { display: none; } /* 取得日を非表示 */
+      .modal { padding: var(--sp-lg); }
+      .modal-actions { justify-content: stretch; }
+      .modal-actions .btn { flex: 1; justify-content: center; }
+      .toolbar { flex-direction: column; }
+      .search-input { min-width: unset; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-title">
+      <div class="header-icon">&#128736;</div>
+      <div>
+        <h1>資格有効期限管理</h1>
+        <div class="header-sub">建設業 / 安全教育 / 施工管理 — データは端末に保存されます</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="openCsvModal()">CSV取込</button>
+      <button class="btn btn-secondary" onclick="exportCsv()">出力</button>
+      <button class="btn btn-primary" onclick="openAddModal()">+ 追加</button>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Alert Banner -->
+  <div class="alert-banner" id="alertBanner">
+    <div class="alert-banner-header">
+      <div class="alert-banner-title">期限アラート</div>
+      <div class="alert-count-badge" id="alertCountBadge">0件</div>
+    </div>
+    <div class="alert-list" id="alertList"></div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="section-header">
+    <div>
+      <div class="section-title">資格一覧</div>
+    </div>
+    <div class="record-count" id="recordCount"></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" class="search-input" id="searchInput" placeholder="氏名・資格名で検索..." oninput="renderTable()">
+    <select class="filter-select" id="filterStatus" onchange="renderTable()">
+      <option value="">すべてのステータス</option>
+      <option value="expired">失効</option>
+      <option value="warn14">14日以内</option>
+      <option value="warn30">30日以内</option>
+      <option value="ok">有効</option>
+    </select>
+  </div>
+
+  <div class="table-wrap">
+    <table id="mainTable">
+      <thead>
+        <tr>
+          <th>氏名</th>
+          <th>資格名</th>
+          <th>有効期限</th>
+          <th>取得日</th>
+          <th>ステータス</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-state-icon">&#128196;</div>
+      <p>データがありません。<br>「+ 追加」ボタンから資格を登録、またはCSVを取り込んでください。</p>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>資格有効期限管理 &mdash; データはブラウザのローカルストレージに保存されます。外部送信なし。<br>
+  Powered by <a href="https://techio-code.github.io" target="_blank" rel="noopener">techio-code</a></p>
+</footer>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-title" id="addModalTitle">資格を追加</div>
+    <form id="addForm" onsubmit="submitForm(event)">
+      <div class="form-group">
+        <label class="form-label" for="fieldName">氏名 <span>*</span></label>
+        <input type="text" class="form-input" id="fieldName" required placeholder="例：田中 太郎">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fieldQual">資格名 <span>*</span></label>
+        <input type="text" class="form-input" id="fieldQual" required placeholder="資格名を入力 または 候補から選択" list="qualSuggestions">
+        <datalist id="qualSuggestions"></datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fieldAcquired">取得日</label>
+        <input type="date" class="form-input" id="fieldAcquired">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fieldExpiry">有効期限 <span>*</span></label>
+        <input type="date" class="form-input" id="fieldExpiry" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="fieldNote">備考</label>
+        <input type="text" class="form-input" id="fieldNote" placeholder="例：5年更新 / 〇〇現場配置">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeAddModal()">キャンセル</button>
+        <button type="submit" class="btn btn-primary" id="addSubmitBtn">保存</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- CSV Import Modal -->
+<div class="modal-overlay" id="csvModal">
+  <div class="modal">
+    <div class="modal-title">CSVファイルを取り込む</div>
+
+    <div class="csv-drop-zone" id="csvDropZone" onclick="document.getElementById('csvFileInput').click()"
+         ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+      <div class="csv-drop-zone-icon">&#128196;</div>
+      <p>クリックまたはドラッグ&amp;ドロップ<br>CSVファイル（.csv）を選択</p>
+    </div>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="onFileSelected(event)">
+
+    <div class="csv-format-note">
+      <strong>CSVフォーマット（1行目はヘッダー）</strong><br>
+      <code>氏名,資格名,取得日,有効期限,備考</code><br>
+      ・日付形式: <code>YYYY/MM/DD</code> または <code>YYYY-MM-DD</code><br>
+      ・取得日・備考は省略可（空欄OK）<br>
+      ・文字コード: UTF-8 または Shift-JIS（BOM付き）<br>
+      ・既存データに追加します（重複は上書き確認なし）
+    </div>
+
+    <div id="csvPreviewMsg" style="display:none;"></div>
+    <div id="csvErrorMsg" style="display:none;" class="csv-error"></div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeCsvModal()">キャンセル</button>
+      <button type="button" class="btn btn-primary" id="csvImportBtn" onclick="importCsv()" disabled>取り込む</button>
+    </div>
+  </div>
+</div>
+
+<!-- Datalist for qualifications (建設業プリセット) -->
+<datalist id="qualSuggestions">
+  <!-- JS側で動的生成 -->
+</datalist>
+
+<script>
+// ===== 定数 =====
+const STORAGE_KEY = 'qualification_tracker_v1';
+
+// 建設業向け資格プリセット
+const QUAL_PRESETS = [
+  // 特別教育
+  '足場の組立て等特別教育',
+  '玉掛け特別教育',
+  '小型移動式クレーン運転特別教育',
+  '高所作業車運転特別教育',
+  'アーク溶接特別教育',
+  '研削砥石取替え特別教育',
+  '低圧電気取扱業務特別教育',
+  '酸素欠乏危険作業特別教育',
+  '有機溶剤業務特別教育',
+  'フォークリフト特別教育',
+  'ロールボックスパレット特別教育',
+  // 技能講習
+  '玉掛け技能講習',
+  'フォークリフト運転技能講習',
+  '小型移動式クレーン運転技能講習',
+  '高所作業車運転技能講習',
+  '床上操作式クレーン運転技能講習',
+  '地山の掘削及び土止め支保工作業主任者',
+  '型枠支保工の組立て等作業主任者',
+  // 施工管理
+  '1級建築施工管理技士',
+  '2級建築施工管理技士',
+  '1級土木施工管理技士',
+  '2級土木施工管理技士',
+  '1級管工事施工管理技士',
+  '2級管工事施工管理技士',
+  '1級電気工事施工管理技士',
+  '2級電気工事施工管理技士',
+  '1級造園施工管理技士',
+  '2級造園施工管理技士',
+  // 主任技術者・監理技術者
+  '主任技術者（建築）',
+  '主任技術者（土木）',
+  '監理技術者（建築）',
+  '監理技術者（土木）',
+  // 安全管理
+  '安全管理者選任時研修',
+  '職長・安全衛生責任者教育',
+  'RST講座（労働安全衛生）',
+  '第一種衛生管理者',
+  '第二種衛生管理者',
+  // その他建設
+  '建築士（1級）',
+  '建築士（2級）',
+  '木造建築士',
+  '建設機械施工管理技士（1級）',
+  '建設機械施工管理技士（2級）',
+  '石綿作業主任者',
+  '有機溶剤作業主任者',
+  '鉛作業主任者',
+  '酸素欠乏・硫化水素危険作業主任者',
+  // 免許
+  '移動式クレーン運転士',
+  'クレーン・デリック運転士',
+  '建設機械施工技士',
+  '車両系建設機械運転士',
+  '整地・運搬・積込み用及び掘削用機械（大型特殊自動車）',
+  // 電気
+  '電気工事士（1種）',
+  '電気工事士（2種）',
+  '電気主任技術者（1種）',
+  '電気主任技術者（2種）',
+  '電気主任技術者（3種）',
+];
+
+// ===== データ管理 =====
+let records = [];
+let editingId = null;
+let parsedCsvRows = [];
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    records = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    records = [];
+  }
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  } catch (e) {
+    showToast('保存に失敗しました（ストレージ不足の可能性）', 'error');
+  }
+}
+
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+// ===== ステータス判定 =====
+function getStatus(expiryStr) {
+  if (!expiryStr) return { code: 'unknown', label: '期限なし', daysLeft: null };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(expiryStr);
+  expiry.setHours(0, 0, 0, 0);
+  if (isNaN(expiry)) return { code: 'unknown', label: '日付不正', daysLeft: null };
+  const diff = Math.floor((expiry - today) / 86400000);
+  if (diff < 0)  return { code: 'expired', label: '失効',      daysLeft: diff };
+  if (diff < 14) return { code: 'warn14',  label: '14日以内',  daysLeft: diff };
+  if (diff < 30) return { code: 'warn30',  label: '30日以内',  daysLeft: diff };
+  return               { code: 'ok',      label: '有効',       daysLeft: diff };
+}
+
+function statusBadgeHtml(status) {
+  const map = {
+    expired: 'badge-expired',
+    warn14:  'badge-warn14',
+    warn30:  'badge-warn30',
+    ok:      'badge-ok',
+    unknown: '',
+  };
+  return `<span class="badge ${map[status.code] || ''}">${status.label}</span>`;
+}
+
+// ===== ソート（期限が近い順） =====
+function sortRecords(list) {
+  return [...list].sort((a, b) => {
+    const sa = getStatus(a.expiry);
+    const sb = getStatus(b.expiry);
+    // 期限なし・不正は最後
+    if (sa.daysLeft === null && sb.daysLeft === null) return 0;
+    if (sa.daysLeft === null) return 1;
+    if (sb.daysLeft === null) return -1;
+    return sa.daysLeft - sb.daysLeft;
+  });
+}
+
+// ===== アラートバナー =====
+function renderAlerts() {
+  const alerts = records.filter(r => {
+    const s = getStatus(r.expiry);
+    return s.code === 'expired' || s.code === 'warn14' || s.code === 'warn30';
+  });
+  const sorted = sortRecords(alerts);
+  const banner = document.getElementById('alertBanner');
+  const list   = document.getElementById('alertList');
+  const badge  = document.getElementById('alertCountBadge');
+
+  if (sorted.length === 0) {
+    banner.classList.remove('has-alerts');
+    return;
+  }
+  banner.classList.add('has-alerts');
+  badge.textContent = sorted.length + '件';
+  list.innerHTML = sorted.slice(0, 10).map(r => {
+    const s = getStatus(r.expiry);
+    let daysText = '';
+    if (s.code === 'expired') daysText = Math.abs(s.daysLeft) + '日経過';
+    else daysText = s.daysLeft + '日後';
+    return `
+      <div class="alert-item ${s.code}">
+        <div class="alert-item-left">
+          <div class="alert-dot"></div>
+          <span><strong>${escHtml(r.name)}</strong> &mdash; ${escHtml(r.qualification)}</span>
+        </div>
+        <span class="alert-days">${daysText} (${r.expiry || ''})</span>
+      </div>
+    `;
+  }).join('');
+  if (sorted.length > 10) {
+    list.innerHTML += `<div style="text-align:center;padding:8px 0;font-size:13px;color:var(--stone);">他 ${sorted.length - 10}件</div>`;
+  }
+}
+
+// ===== テーブル描画 =====
+function renderTable() {
+  const query  = document.getElementById('searchInput').value.trim().toLowerCase();
+  const filter = document.getElementById('filterStatus').value;
+
+  let list = records.filter(r => {
+    const matchText = !query ||
+      r.name.toLowerCase().includes(query) ||
+      r.qualification.toLowerCase().includes(query);
+    const s = getStatus(r.expiry);
+    const matchStatus = !filter || s.code === filter;
+    return matchText && matchStatus;
+  });
+  list = sortRecords(list);
+
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  const count = document.getElementById('recordCount');
+
+  count.textContent = `${list.length} / ${records.length} 件`;
+
+  if (list.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = list.map(r => {
+    const s = getStatus(r.expiry);
+    return `
+      <tr>
+        <td class="td-name">${escHtml(r.name)}</td>
+        <td>${escHtml(r.qualification)}</td>
+        <td class="td-date">${r.expiry || '&mdash;'}</td>
+        <td class="td-date">${r.acquired || '&mdash;'}</td>
+        <td>${statusBadgeHtml(s)}</td>
+        <td class="td-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openEditModal('${escAttr(r.id)}')">編集</button>
+          <button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="deleteRecord('${escAttr(r.id)}')">削除</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderAll() {
+  renderAlerts();
+  renderTable();
+}
+
+// ===== 追加・編集モーダル =====
+function openAddModal() {
+  editingId = null;
+  document.getElementById('addModalTitle').textContent = '資格を追加';
+  document.getElementById('addSubmitBtn').textContent = '保存';
+  document.getElementById('addForm').reset();
+  document.getElementById('addModal').classList.add('open');
+  document.getElementById('fieldName').focus();
+}
+
+function openEditModal(id) {
+  const r = records.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  document.getElementById('addModalTitle').textContent = '資格を編集';
+  document.getElementById('addSubmitBtn').textContent = '更新';
+  document.getElementById('fieldName').value     = r.name || '';
+  document.getElementById('fieldQual').value     = r.qualification || '';
+  document.getElementById('fieldAcquired').value = r.acquired || '';
+  document.getElementById('fieldExpiry').value   = r.expiry || '';
+  document.getElementById('fieldNote').value     = r.note || '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+  editingId = null;
+}
+
+function submitForm(e) {
+  e.preventDefault();
+  const rec = {
+    id:            editingId || generateId(),
+    name:          document.getElementById('fieldName').value.trim(),
+    qualification: document.getElementById('fieldQual').value.trim(),
+    acquired:      document.getElementById('fieldAcquired').value,
+    expiry:        document.getElementById('fieldExpiry').value,
+    note:          document.getElementById('fieldNote').value.trim(),
+    updatedAt:     new Date().toISOString(),
+  };
+  if (!rec.name || !rec.qualification || !rec.expiry) {
+    showToast('氏名・資格名・有効期限は必須です', 'error');
+    return;
+  }
+  if (editingId) {
+    const idx = records.findIndex(x => x.id === editingId);
+    if (idx >= 0) records[idx] = rec;
+  } else {
+    records.push(rec);
+  }
+  saveData();
+  renderAll();
+  closeAddModal();
+  showToast(editingId ? '更新しました' : '追加しました', 'success');
+}
+
+function deleteRecord(id) {
+  if (!confirm('この資格データを削除しますか？')) return;
+  records = records.filter(r => r.id !== id);
+  saveData();
+  renderAll();
+  showToast('削除しました');
+}
+
+// ===== CSVモーダル =====
+function openCsvModal() {
+  parsedCsvRows = [];
+  document.getElementById('csvFileInput').value = '';
+  document.getElementById('csvPreviewMsg').style.display = 'none';
+  document.getElementById('csvErrorMsg').style.display = 'none';
+  document.getElementById('csvImportBtn').disabled = true;
+  document.getElementById('csvModal').classList.add('open');
+}
+
+function closeCsvModal() {
+  document.getElementById('csvModal').classList.remove('open');
+  parsedCsvRows = [];
+}
+
+function onDragOver(e) {
+  e.preventDefault();
+  document.getElementById('csvDropZone').classList.add('dragover');
+}
+function onDragLeave(e) {
+  document.getElementById('csvDropZone').classList.remove('dragover');
+}
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('csvDropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) readCsvFile(file);
+}
+function onFileSelected(e) {
+  const file = e.target.files[0];
+  if (file) readCsvFile(file);
+}
+
+function readCsvFile(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    let text = e.target.result;
+    // BOM除去
+    if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+    parseCsvText(text);
+  };
+  reader.onerror = function() {
+    showCsvError('ファイルの読み込みに失敗しました');
+  };
+  // まずUTF-8で試みる
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCsvText(text) {
+  const previewEl = document.getElementById('csvPreviewMsg');
+  const errorEl   = document.getElementById('csvErrorMsg');
+  previewEl.style.display = 'none';
+  errorEl.style.display   = 'none';
+
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) {
+    showCsvError('データが2行以上必要です（1行目: ヘッダー、2行目以降: データ）');
+    return;
+  }
+
+  // ヘッダー解析 — 列名マッピング
+  const header = parseCsvLine(lines[0]).map(h => h.trim());
+  const COL_MAP = {
+    name:          ['氏名', '名前', 'name', '従業員名', '作業員名'],
+    qualification: ['資格名', '資格', 'qualification', '検定名', '免許名'],
+    acquired:      ['取得日', '取得年月日', 'acquired', '取得', '資格取得日'],
+    expiry:        ['有効期限', '期限', 'expiry', '有効期限日', '失効日', '更新期限'],
+    note:          ['備考', 'note', 'メモ', '備考欄'],
+  };
+  const colIdx = {};
+  for (const [key, aliases] of Object.entries(COL_MAP)) {
+    for (let i = 0; i < header.length; i++) {
+      if (aliases.includes(header[i])) { colIdx[key] = i; break; }
+    }
+  }
+  if (colIdx.name === undefined || colIdx.qualification === undefined || colIdx.expiry === undefined) {
+    showCsvError(`必須列「氏名」「資格名」「有効期限」が見つかりませんでした。\nヘッダー: ${header.join(' / ')}`);
+    return;
+  }
+
+  const rows = [];
+  const errors = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCsvLine(lines[i]);
+    const name          = (cols[colIdx.name] || '').trim();
+    const qualification = (cols[colIdx.qualification] || '').trim();
+    const acquiredRaw   = colIdx.acquired !== undefined ? (cols[colIdx.acquired] || '').trim() : '';
+    const expiryRaw     = (cols[colIdx.expiry] || '').trim();
+    const note          = colIdx.note !== undefined ? (cols[colIdx.note] || '').trim() : '';
+
+    if (!name && !qualification) continue; // 空行スキップ
+
+    if (!name) { errors.push(`${i+1}行目: 氏名が空`); continue; }
+    if (!qualification) { errors.push(`${i+1}行目: 資格名が空`); continue; }
+
+    const acquired = normalizeDate(acquiredRaw);
+    const expiry   = normalizeDate(expiryRaw);
+    if (expiryRaw && !expiry) { errors.push(`${i+1}行目: 日付形式不正「${expiryRaw}」`); }
+
+    rows.push({ id: generateId(), name, qualification, acquired, expiry, note, updatedAt: new Date().toISOString() });
+  }
+
+  if (rows.length === 0 && errors.length > 0) {
+    showCsvError('エラーが発生しました:\n' + errors.slice(0,5).join('\n'));
+    return;
+  }
+
+  parsedCsvRows = rows;
+  previewEl.className = 'csv-preview';
+  previewEl.style.display = '';
+  let msg = `${rows.length}件のデータを読み込みました。取り込みボタンを押すと追加されます。`;
+  if (errors.length > 0) msg += ` (スキップ: ${errors.length}行)`;
+  previewEl.textContent = msg;
+  document.getElementById('csvImportBtn').disabled = false;
+
+  if (errors.length > 0) {
+    const errEl = document.getElementById('csvErrorMsg');
+    errEl.style.display = '';
+    errEl.textContent = '警告 (一部スキップ):\n' + errors.slice(0,3).join('\n');
+  }
+}
+
+function parseCsvLine(line) {
+  const result = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (ch === ',' && !inQ) {
+      result.push(cur); cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+function normalizeDate(s) {
+  if (!s) return '';
+  // YYYY/MM/DD or YYYY-MM-DD
+  const m1 = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (m1) return `${m1[1]}-${m1[2].padStart(2,'0')}-${m1[3].padStart(2,'0')}`;
+  // YYY/MM/DD (和暦など — 簡易: 8桁数字)
+  const m2 = s.match(/^(\d{8})$/);
+  if (m2) return `${m2[1].slice(0,4)}-${m2[1].slice(4,6)}-${m2[1].slice(6,8)}`;
+  return '';
+}
+
+function showCsvError(msg) {
+  const el = document.getElementById('csvErrorMsg');
+  el.style.display = '';
+  el.textContent = msg;
+  document.getElementById('csvImportBtn').disabled = true;
+  parsedCsvRows = [];
+}
+
+function importCsv() {
+  if (parsedCsvRows.length === 0) return;
+  records = records.concat(parsedCsvRows);
+  saveData();
+  renderAll();
+  closeCsvModal();
+  showToast(`${parsedCsvRows.length}件を取り込みました`, 'success');
+  parsedCsvRows = [];
+}
+
+// ===== CSVエクスポート =====
+function exportCsv() {
+  if (records.length === 0) {
+    showToast('エクスポートするデータがありません', 'error');
+    return;
+  }
+  const sorted = sortRecords(records);
+  const BOM = '﻿';
+  const header = ['氏名', '資格名', '取得日', '有効期限', 'ステータス', '備考'];
+  const rows = sorted.map(r => {
+    const s = getStatus(r.expiry);
+    return [r.name, r.qualification, r.acquired, r.expiry, s.label, r.note]
+      .map(v => `"${(v || '').replace(/"/g, '""')}"`)
+      .join(',');
+  });
+  const csv = BOM + header.join(',') + '\n' + rows.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const today = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  a.download = `qualification_${today}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSVをダウンロードしました', 'success');
+}
+
+// ===== Toast =====
+function showToast(msg, type) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast' + (type ? ' ' + type : '');
+  toast.textContent = msg;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => toast.classList.add('show'));
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 2800);
+}
+
+// ===== ユーティリティ =====
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return (s || '').replace(/'/g, "\\'");
+}
+
+// ===== 初期化 =====
+function init() {
+  // datalist構築
+  const dl = document.getElementById('qualSuggestions');
+  QUAL_PRESETS.forEach(q => {
+    const opt = document.createElement('option');
+    opt.value = q;
+    dl.appendChild(opt);
+  });
+
+  loadData();
+  renderAll();
+
+  // モーダル外クリックで閉じる
+  document.getElementById('addModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddModal();
+  });
+  document.getElementById('csvModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCsvModal();
+  });
+
+  // Escキー
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeAddModal(); closeCsvModal(); }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
